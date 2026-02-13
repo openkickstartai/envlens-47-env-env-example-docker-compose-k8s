@@ -1,2 +1,48 @@
-# envlens-47-env-env-example-docker-compose-k8s
-每个项目都用环境变量做配置，但没有任何一个地方是环境变量的 single source of truth。代码里写 os.environ['DB_HOST']，.env.example 里写的是 DATABASE_HOST，docker-compose.yml 里又是第三种默认值，README 里的设置指南还停留在半年前，Kubernetes 的 ConfigMap 缺了三个上个月新加的��...
+# EnvLens
+
+Environment variable drift scanner. Finds inconsistencies between your code, `.env.example`, and `docker-compose.yml`.
+
+## Install
+
+```bash
+go install github.com/envlens/envlens@latest
+# or build from source
+go build -o envlens .
+```
+
+## Usage
+
+```bash
+# Scan current directory
+./envlens scan .
+
+# CI mode (exits 1 on drift)
+./envlens scan --ci .
+```
+
+## What It Detects
+
+| Type | Description |
+|------|-------------|
+| **missing** | Var referenced in code but absent from `.env.example` |
+| **ghost** | Var in `.env.example` but never referenced in code |
+| **sensitive** | Var matching PASSWORD/SECRET/TOKEN/KEY exposed in `docker-compose.yml` |
+
+## Supported Sources
+
+- **Code**: Python (`os.getenv`, `os.environ`), Go (`os.Getenv`), TypeScript/JS (`process.env`), Java (`System.getenv`)
+- **Config**: `.env`, `.env.example`, `.env.sample`
+- **Infra**: `docker-compose.yml` / `docker-compose.yaml`
+
+## GitHub Actions
+
+```yaml
+- name: EnvLens drift check
+  run: |
+    go install github.com/envlens/envlens@latest
+    envlens scan --ci .
+```
+
+## License
+
+MIT
