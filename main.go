@@ -76,6 +76,31 @@ func DetectDrift(refs []EnvRef) []Issue {
 			}
 		}
 	}
+	// Detect default value inconsistencies across sources
+	defaults := map[string]map[string]string{}
+	for _, r := range refs {
+		if r.Default == "" {
+			continue
+		}
+		if defaults[r.Name] == nil {
+			defaults[r.Name] = map[string]string{}
+		}
+		defaults[r.Name][r.Source] = r.Default
+	}
+	for v, srcDefaults := range defaults {
+		vals := map[string]bool{}
+		for _, d := range srcDefaults {
+			vals[d] = true
+		}
+		if len(vals) > 1 {
+			sources := make([]string, 0, len(srcDefaults))
+			for src, d := range srcDefaults {
+				sources = append(sources, fmt.Sprintf("%s=%q", src, d))
+			}
+			sort.Strings(sources)
+			issues = append(issues, Issue{"default-mismatch", v, fmt.Sprintf("Inconsistent defaults: %s", strings.Join(sources, ", "))})
+		}
+	}
 	sort.Slice(issues, func(i, j int) bool { return issues[i].Var < issues[j].Var })
 	return issues
 }
