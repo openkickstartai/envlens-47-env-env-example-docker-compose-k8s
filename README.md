@@ -26,7 +26,8 @@ go build -o envlens .
 |------|-------------|
 | **missing** | Var referenced in code but absent from `.env.example` |
 | **ghost** | Var in `.env.example` but never referenced in code |
-| **sensitive** | Var matching PASSWORD/SECRET/TOKEN/KEY exposed in `docker-compose.yml` |
+| **sensitive** | Var matching PASSWORD/SECRET/TOKEN/KEY/PRIVATE exposed in `docker-compose.yml` |
+| **default-mismatch** | Same var has different default values across sources |
 
 ## Supported Sources
 
